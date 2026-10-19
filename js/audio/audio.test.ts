@@ -443,6 +443,64 @@ describe("Events: upload via file input", () => {
 	});
 });
 
+async function drop_file_with_mime_type(
+	drop_zone: HTMLElement,
+	file_name: string,
+	mime_type: string
+): Promise<void> {
+	const data_transfer = new DataTransfer();
+	data_transfer.items.add(
+		new File([new Uint8Array([1, 2, 3])], file_name, { type: mime_type })
+	);
+	for (const drag_event of ["dragenter", "dragover", "drop"]) {
+		drop_zone.dispatchEvent(
+			new DragEvent(drag_event, { dataTransfer: data_transfer, bubbles: true })
+		);
+	}
+	await tick();
+}
+
+describe("Upload: file type validation", () => {
+	setupi18n();
+	afterEach(() => cleanup());
+
+	test.each(["application/ogg", "video/ogg", ""])(
+		"an .ogg file reported as %j is uploaded",
+		async (mime_type) => {
+			const { listen, getByLabelText } = await render(Audio, upload_props);
+			const upload = listen("upload");
+			const warning = listen("warning");
+
+			await drop_file_with_mime_type(
+				getByLabelText("audio.drop_to_upload"),
+				"clip.ogg",
+				mime_type
+			);
+
+			await waitFor(() => expect(upload).toHaveBeenCalledTimes(1));
+			expect(warning).not.toHaveBeenCalled();
+		}
+	);
+
+	test("a file that is not audio is rejected with a warning", async () => {
+		const { listen, getByLabelText } = await render(Audio, upload_props);
+		const upload = listen("upload");
+		const warning = listen("warning");
+
+		await drop_file_with_mime_type(
+			getByLabelText("audio.drop_to_upload"),
+			"photo.png",
+			"image/png"
+		);
+
+		await waitFor(() => expect(warning).toHaveBeenCalledTimes(1));
+		expect(warning).toHaveBeenCalledWith(
+			expect.stringContaining("Invalid file type: photo.png")
+		);
+		expect(upload).not.toHaveBeenCalled();
+	});
+});
+
 function make_wav_blob(): Blob {
 	const sample_rate = 8000;
 	const num_samples = 800;

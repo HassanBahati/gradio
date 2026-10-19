@@ -41,6 +41,17 @@ describe("is_valid_mimetype", () => {
 		expect(is_valid_mimetype(null, "anything.xyz", "")).toBe(true);
 	});
 
+	test("an extension entry matches whatever MIME type the browser reports", () => {
+		for (const type of ["application/ogg", "video/ogg", ""]) {
+			expect(is_valid_mimetype([".ogg", "audio/*"], "clip.ogg", type)).toBe(
+				true
+			);
+		}
+		expect(is_valid_mimetype(["audio/*"], "clip.ogg", "application/ogg")).toBe(
+			false
+		);
+	});
+
 	test("accepts a comma-separated string or an array", () => {
 		expect(is_valid_mimetype(".png, .nii.gz", "brain.nii.gz", "")).toBe(true);
 		expect(is_valid_mimetype([".png", ".nii.gz"], "brain.nii.gz", "")).toBe(

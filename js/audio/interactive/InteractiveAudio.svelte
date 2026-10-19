@@ -378,9 +378,42 @@
 			{/if}
 		{:else if active_source === "upload"}
 			<!-- explicitly listed out audio mimetypes due to iOS bug not recognizing audio/* -->
+			<!-- extensions too, as browsers may not report an audio/* type, e.g. Firefox reports .ogg as application/ogg -->
 			<Upload
 				bind:upload_promise
-				filetype="audio/aac,audio/midi,audio/mpeg,audio/ogg,audio/wav,audio/x-wav,audio/opus,audio/webm,audio/flac,audio/vnd.rn-realaudio,audio/x-ms-wma,audio/x-aiff,audio/amr,audio/*"
+				filetype={[
+					"audio/aac",
+					"audio/midi",
+					"audio/mpeg",
+					"audio/ogg",
+					"audio/wav",
+					"audio/x-wav",
+					"audio/opus",
+					"audio/webm",
+					"audio/flac",
+					"audio/vnd.rn-realaudio",
+					"audio/x-ms-wma",
+					"audio/x-aiff",
+					"audio/amr",
+					"audio/*",
+					".aac",
+					".mid",
+					".midi",
+					".mp3",
+					".ogg",
+					".oga",
+					".opus",
+					".wav",
+					".weba",
+					".webm",
+					".flac",
+					".ra",
+					".wma",
+					".aif",
+					".aiff",
+					".amr",
+					".m4a"
+				]}
 				onload={handle_load}
 				bind:dragging
 				bind:uploading
